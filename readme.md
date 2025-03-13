@@ -1,5 +1,8 @@
 # 📄 PSMimeTypes
 
+[![PSMimeTypes PSGallary Version](https://img.shields.io/powershellgallery/v/PSMimeTypes?label="PSGallery")](https://www.powershellgallery.com/packages/PSMimeTypes/) [![PSGallery Downloads](https://img.shields.io/powershellgallery/dt/PSMimeTypes?label=PSGallery%20Downloads)](https://www.powershellgallery.com/packages/PSMimeTypes/1.0.0)
+
+
 ## 🌍 Overview
 
 **PSMimeTypes** is a PowerShell module that provides functionality for resolving MIME types from file extensions and filenames. It utilizes the [JSHTTP Mime-DB](https://github.com/jshttp/mime-db) for MIME type lookups. By default, the module fetches the database from the internet but also allows importing a local JSON copy for offline usage.
