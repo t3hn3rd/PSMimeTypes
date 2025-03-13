@@ -1,37 +1,66 @@
 <#
-	.SYNOPSIS
-		A utility module to resolve MIME Types from Filenames/Extensions.
-	.DESCRIPTION
-		This module allows for the resolution of MIME types from a provided Filename/Extension.
-    
-    It caches & utilizes the JSHTTP Mime-DB to resolve the MIME type based on the provided extension,
-    this means that by default it requires an internet connection to work, however, you can optionally
-    configure the module to use a local copy of the Mime-DB.
-	.NOTES
-        FILE NAME: 
-            PSMimeTypes.psm1
-        AUTHOR: 
-            Kieron Morris (kjm@kieronmorris.me)
-        VERSION:
-            1.0.0
-        GUID:
-            5d95d259-3cb3-4e5a-b65f-13b3e6ac1c85
-        COPYRIGHT:
-            (c) 2025 t3hn3rd (kjm@kieronmorris.me). All rights reserved.
+  .SYNOPSIS
+      PSMimeTypes - A PowerShell module for resolving MIME types.
+
+  .DESCRIPTION
+      PSMimeTypes provides functions to determine the MIME type of files based on their
+      extensions or filenames. It utilizes the JSHTTP Mime-DB for lookups and supports
+      importing a local database for offline use.
+
+  .EXPORTS
+      - Convert-ExtensionToMimeType
+      - Convert-FileNameToMimeType
+      - Import-MimeDBFromFile
+
+  .FUNCTIONS
+      - Convert-ExtensionToMimeType
+          Resolves a MIME type based on a given file extension.
+
+          PARAMETERS:
+              - Extension (String, Mandatory): The file extension (e.g., "jpg", "pdf").
+
+      - Convert-FileNameToMimeType
+          Extracts the file extension from a filename and resolves its MIME type.
+
+          PARAMETERS:
+              - FileName (String, Mandatory): The full filename including the extension.
+
+      - Import-MimeDBFromFile
+          Imports a local JSON-based MIME database for offline lookups.
+
+          PARAMETERS:
+              - Path (String, Mandatory): The path to the JSON MIME database file.
+
+  .EXAMPLES
+      Resolving MIME type from an extension:
+          Convert-ExtensionToMimeType -Extension "png"
+          # Output: image/png
+
+      Resolving MIME type from a filename:
+          Convert-FileNameToMimeType -FileName "example.docx"
+          # Output: application/vnd.openxmlformats-officedocument.wordprocessingml.document
+
+      Importing a local MIME database:
+          Import-MimeDBFromFile -Path "C:\mime-db.json"
+          # Output: True (if successful) or False (if failed)
+
+  .LINK
+      Github: https://github.com/t3hn3rd/PSMimeTypes
+      JSHTTP Mime-DB: https://github.com/jshttp/mime-db
 #>
 
-<# 
-  .SYNOPSIS 
+<#
+  .SYNOPSIS
     A PowerShell class for resolving MIME types from file extensions.
   .DESCRIPTION
-    The MimeTypeResolver class provides a method to determine the MIME type of a given file extension by 
+    The MimeTypeResolver class provides a method to determine the MIME type of a given file extension by
     referencing an online MIME database or an imported JSON file.
 
-  .PROPERTIES 
+  .PROPERTIES
     - MimeTypes [PSObject]: Stores the MIME type database.
 
-  .METHODS 
-    - resolveMimeType($Extension): Returns the MIME type for a given file extension. 
+  .METHODS
+    - resolveMimeType($Extension): Returns the MIME type for a given file extension.
     - ImportMimeDBFromFile($Path): Loads a MIME type database from a local JSON file.
 #>
 class MimeTypeResolver {
@@ -60,24 +89,24 @@ class MimeTypeResolver {
 }
 
 <#
-.SYNOPSIS
+  .SYNOPSIS
     Converts a file extension to its corresponding MIME type.
 
-.DESCRIPTION
-    The Convert-ExtensionToMimeType function takes a file extension as input and 
+  .DESCRIPTION
+    The Convert-ExtensionToMimeType function takes a file extension as input and
     returns the associated MIME type using the MimeTypeResolver class.
 
-.PARAMETERS
+  .INPUTS
     [String] $Extension
-        The file extension to look up.
+      The file extension to look up.
 
-.OUTPUTS
+  .OUTPUTS
     [String]
-        The corresponding MIME type for the given file extension.
+      The corresponding MIME type for the given file extension.
 
-.EXAMPLES
+  .EXAMPLE
     Convert a .jpg extension to its MIME type:
-    
+
     PS> Convert-ExtensionToMimeType -Extension "jpg"
     image/jpeg
 
@@ -95,28 +124,30 @@ function Convert-ExtensionToMimeType {
     [ValidateNotNullOrEmpty()]
     [string]$Extension
   )
-  return [MimeTypeResolver]::resolveMimeType($Extension)
+  process {
+    return [MimeTypeResolver]::resolveMimeType($Extension)
+  }
 }
 
 <#
-.SYNOPSIS
+  .SYNOPSIS
     Determines the MIME type of a file based on its extension.
 
-.DESCRIPTION
-    The Convert-FileNameToMimeType function extracts the file extension from a given 
+  .DESCRIPTION
+    The Convert-FileNameToMimeType function extracts the file extension from a given
     filename and returns the corresponding MIME type using Convert-ExtensionToMimeType.
 
-.PARAMETERS
+  .INPUTS
     [String] $FileName
-        The name of the file, including its extension.
+      The name of the file, including its extension.
 
-.OUTPUTS
+  .OUTPUTS
     [String]
-        The corresponding MIME type for the file's extension.
+      The corresponding MIME type for the file's extension.
 
-.EXAMPLES
+  .EXAMPLE
     Get the MIME type of an image file:
-    
+
     PS> Convert-FileNameToMimeType -FileName "picture.jpg"
     image/jpeg
 
@@ -134,29 +165,31 @@ function Convert-FileNameToMimeType {
     [ValidateNotNullOrEmpty()]
     [string]$FileName
   )
-  $Extension = [System.IO.Path]::GetExtension($FileName)
-  return Convert-ExtensionToMimeType -Extension $Extension
+  process {
+    $Extension = [System.IO.Path]::GetExtension($FileName)
+    return Convert-ExtensionToMimeType -Extension $Extension
+  }
 }
 
 <#
-.SYNOPSIS
+  .SYNOPSIS
     Imports a MIME type database from a JSON file.
 
-.DESCRIPTION
-    The Import-MimeDBFromFile function loads a MIME type database from the specified 
+  .DESCRIPTION
+    The Import-MimeDBFromFile function loads a MIME type database from the specified
     file and updates the MimeTypeResolver class with the imported data.
 
-.PARAMETERS
+  .INPUTS
     [String] $Path
-        The file path to the MIME type database in JSON format.
+      The file path to the MIME type database in JSON format.
 
-.OUTPUTS
+  .OUTPUTS
     [Bool]
-        Returns $true if the import was successful, otherwise $false.
+      Returns $true if the import was successful, otherwise $false.
 
-.EXAMPLES
+  .EXAMPLE
     Import a MIME database from a local file:
-    
+
     PS> Import-MimeDBFromFile -Path "C:\path\to\mime-db.json"
     True
 
@@ -174,7 +207,9 @@ function Import-MimeDBFromFile {
     [ValidateNotNullOrEmpty()]
     [string]$Path
   )
-  return [MimeTypeResolver]::ImportMimeDBFromFile($Path)
+  process {
+    return [MimeTypeResolver]::ImportMimeDBFromFile($Path)
+  }
 }
 
 Export-ModuleMember -Function Convert-ExtensionToMimeType, Convert-FileNameToMimeType, Import-MimeDBFromFile
