@@ -1,0 +1,97 @@
+name: Publish PowerShell Module
+
+on:
+  push:
+    branches:
+      - master
+    tags-ignore:
+      - 'v*'
+
+jobs:
+  validate-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 
+
+      - name: Install PowerShell
+        run: |
+          sudo apt update
+          sudo apt install -y powershell
+
+      - name: Extract Module Version from Manifest
+        id: get_version
+        shell: pwsh
+        run: |
+          # Load the manifest
+          $ManifestPath = "PSMimeTypes/PSMimeTypes.psd1"
+          $ModuleData = Import-PowerShellDataFile -Path $ManifestPath
+          $CurrentVersion = $ModuleData.ModuleVersion
+          
+          # Fetch the latest tag (assuming tags follow the versioning scheme)
+          git fetch --tags
+          $LatestTag = (git tag --sort=-v:refname | Select-Object -First 1) -replace "^v", ""
+
+          # Compare versions
+          Write-Host "Current Module Version: $CurrentVersion"
+          Write-Host "Latest Git Tag: $LatestTag"
+
+          if (-not $LatestTag -or [version]$CurrentVersion -gt [version]$LatestTag) {
+              Write-Host "✅ Version has been incremented, proceeding with publish..."
+              echo "SHOULD_PUBLISH=true" >> $env:GITHUB_ENV
+              echo "version=$CurrentVersion" >> $env:GITHUB_ENV
+          } else {
+              Write-Host "⚠️ Module version has not been incremented! Skipping publish..."
+              echo "SHOULD_PUBLISH=false" >> $env:GITHUB_ENV
+          }
+
+      - name: Publish Module to PSGallery
+        if: env.SHOULD_PUBLISH == 'true'
+        shell: pwsh
+        env:
+          PS_GALLERY_KEY: ${{ secrets.PS_GALLERY_KEY }}
+        run: |
+          if ($env:ACT -eq 'true') {
+            Write-Host "✅ Would have published module to PSGallery."
+          } else {
+            Write-Host "⚙️ Publishing module to PSGallery..."
+            $NuGetApiKey = "$($env:PS_GALLERY_KEY)"
+            Publish-Module -Path PSMimeTypes -NuGetApiKey $NuGetApiKey -Repository PSGallery
+            Write-Host "✅ Module published to PSGallery."
+          }
+
+      - name: Create Git Tag
+        if: env.SHOULD_PUBLISH == 'true'
+        env:
+          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+        shell: pwsh
+        run: |
+          if($env:ACT -eq 'true') {
+            Write-Host "✅ Would have created Git tag."
+          } else {
+            Write-Host "🏷️ Creating Git tag..."
+            $DeployKey = $env:DEPLOY_KEY
+
+            # Configure SSH for GitHub
+            mkdir -p ~/.ssh
+            echo "$DeployKey" > ~/.ssh/id_rsa
+            chmod 600 ~/.ssh/id_rsa
+            
+            # Disable host key checking
+            echo -e "Host github.com\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
+
+            # Setup Git User Config
+            git config --global user.name "GitHub Actions"
+            git config --global user.email "actions@github.com"
+            
+            git tag "v$($env:version)"
+            git push origin "v$($env:version)"
+            Write-Host "✅ Git tag ."
+          }
+
+      - name: Skip Message (if not publishing)
+        if: env.SHOULD_PUBLISH == 'false'
+        run: echo "✅ No version change detected, skipping publish."
