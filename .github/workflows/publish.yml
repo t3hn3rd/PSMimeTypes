@@ -93,6 +93,26 @@ jobs:
             echo "✅ Git tag created."
           fi
 
+      - name: Create GitHub Release
+        if: env.SHOULD_PUBLISH == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ "$ACT" = "true" ]; then
+            echo "✅ Would have created GitHub release."
+          else
+            echo "📦 Creating GitHub release for v$version..."
+            gh release create "v$version" \
+              --repo "$GITHUB_REPOSITORY" \
+              --title "PSMimeTypes v$version" \
+              --notes "🚀 Released PSMimeTypes v$version" \
+              --generate-notes
+            echo "✅ GitHub release created."
+          fi
+
       - name: Skip Message (if not publishing)
         if: env.SHOULD_PUBLISH == 'false'
         run: echo "✅ No version change detected, skipping publish."
+
+      - name: Camo Purge
+        uses: kevincobain2000/action-camo-purge@v1
