@@ -1,7 +1,6 @@
 # 📄 PSMimeTypes
 
-[![PSMimeTypes PSGallary Version](https://img.shields.io/powershellgallery/v/PSMimeTypes?label="PSGallery")](https://www.powershellgallery.com/packages/PSMimeTypes/) [![PSGallery Downloads](https://img.shields.io/powershellgallery/dt/PSMimeTypes?label=PSGallery%20Downloads)](https://www.powershellgallery.com/packages/PSMimeTypes/1.0.0)
-
+[![PSMimeTypes PSGallary Version](https://img.shields.io/powershellgallery/v/PSMimeTypes?label="PSGallery")](https://www.powershellgallery.com/packages/PSMimeTypes/) [![PSGallery Downloads](https://img.shields.io/powershellgallery/dt/PSMimeTypes?label=PSGallery%20Downloads)](https://www.powershellgallery.com/packages/PSMimeTypes/)
 
 ## 🌍 Overview
 
@@ -58,6 +57,6 @@ This project is licensed under the Apache 2.0 License. See the LICENSE file for 
 ## 🎖 Credits
 This project makes use of the [JSHTTP Mime-DB](https://github.com/jshttp/mime-db). Special thanks to the maintainers and contributors of the Mime-DB for their work in maintaining an extensive and accurate MIME type database.
 
-## 👨‍💻 Author
-**Kieron Morris** (t3hn3rd) - [kjm@kieronmorris.me](mailto:kjm@kieronmorris.me)
+## 👨‍💻 Contributors
+- **Kieron Morris** (t3hn3rd) - [kjm@kieronmorris.me](mailto:kjm@kieronmorris.me)
 
