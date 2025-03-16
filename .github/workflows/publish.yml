@@ -67,12 +67,11 @@ jobs:
         if: env.SHOULD_PUBLISH == 'true'
         env:
           DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
-        shell: pwsh
         run: |
-          if($env:ACT -eq 'true') {
-            Write-Host "✅ Would have created Git tag."
-          } else {
-            Write-Host "🏷️ Creating Git tag..."
+          if [ "$ACT" = "true" ]; then
+            echo "✅ Would have created Git tag."
+          else
+            echo "🏷️ Creating Git tag..."
             $DeployKey = $env:DEPLOY_KEY
 
             # Configure SSH for GitHub
@@ -89,8 +88,8 @@ jobs:
             
             git tag "v$($env:version)"
             git push origin "v$($env:version)"
-            Write-Host "✅ Git tag ."
-          }
+            echo "✅ Git tag created."
+          fi
 
       - name: Skip Message (if not publishing)
         if: env.SHOULD_PUBLISH == 'false'
