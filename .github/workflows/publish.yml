@@ -72,7 +72,7 @@ jobs:
             echo "✅ Would have created Git tag."
           else
             echo "🏷️ Creating Git tag..."
-            $DeployKey = $env:DEPLOY_KEY
+            DeployKey="$DEPLOY_KEY"
 
             # Configure SSH for GitHub
             mkdir -p ~/.ssh
@@ -86,8 +86,8 @@ jobs:
             git config --global user.name "GitHub Actions"
             git config --global user.email "actions@github.com"
             
-            git tag "v$($env:version)"
-            git push origin "v$($env:version)"
+            git tag "v$version"
+            git push origin "v$version"
             echo "✅ Git tag created."
           fi
 
